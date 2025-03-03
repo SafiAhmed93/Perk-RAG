@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from ragapp.models.models import ChatRequest
+# from .models.models import ChatRequest
+from models.models import ChatRequest
 app = FastAPI()
 
 @app.get("/auth")

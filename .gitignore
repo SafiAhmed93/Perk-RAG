@@ -3,3 +3,6 @@
 berttopic_results
 dist
 GIM-Docs
+.env
+ragapp/umar_test
+__pycache__

@@ -1,7 +1,8 @@
-import datetime
+from datetime import datetime
+import uuid
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 class Role(Enum):
     ADMIN = 1
@@ -21,7 +22,9 @@ class User:
 @dataclass
 class ChatRequest:
     user: User
-    message: str
+    message: Optional[str]=None
+    Timestamp: Optional[datetime]=None
+    session_id: Optional[str]=str(uuid.uuid4())
     date_created: datetime
     date_last_updated: datetime
 
