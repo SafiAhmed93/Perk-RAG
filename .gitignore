@@ -6,3 +6,6 @@ GIM-Docs
 .env
 ragapp/umar_test
 __pycache__
+ragapp/__pycache__
+ragapp/models/__pycache__
+tests/__pycache__
