@@ -1,14 +1,15 @@
 import uuid
 
-from azure.data.tables import TableServiceClient
-
+from ragapp.models.database import Database
 from ragapp.models.models import ChatRequest
 from typing import List, Dict
 
 
 class ChatRepository:
-    def __init__(self):
-        self.client = TableServiceClient.from_connection_string("").get_table_client("chat")
+    def __init__(self, database: Database):
+        self.table_name = "chat"
+        self.database = database
+        self.client = self.database.get_table_client(self.table_name)
 
     @staticmethod
     def _chat_to_entity(partition_key: str, row_key: str, chat_request: ChatRequest) -> Dict[str, any]:
@@ -33,7 +34,6 @@ class ChatRepository:
         ))
 
     def list_chat(self, partition_key: str) -> List[str]:
-
         return self.client.query_entities(
             partition_key
         )
@@ -43,6 +43,3 @@ class ChatRepository:
             self._chat_to_entity(chat_request.user, str(uuid.uuid4()), chat_request)
         )
         return "done"
-
-    # def get_all_chats(self):
-    #     return self.client.list_entities()
