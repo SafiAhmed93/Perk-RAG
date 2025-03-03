@@ -1,10 +1,14 @@
 import uuid
 import os
+# from database import Database
+from ragapp.models.models import ChatRequest,User
 from ragapp.models.database import Database
+
 from azure.data.tables import TableServiceClient,UpdateMode
 # from dotenv import load_dotenv
-from ragapp.models.models import ChatRequest
+# from models import ChatRequest,User
 from typing import List, Dict
+import json
 # import logging
 
 # load_dotenv("C:\\Users\\Brio-LT-Umar\\Desktop\\PROJECTS\\GIM\\.env")
@@ -19,34 +23,39 @@ class ChatRepository:
         self.table_name="chat"
         self.service_client=TableServiceClient.from_connection_string("UseDevelopmentStorage=true")
         self.table_client=database.get_table_client(self.table_name)
+
+    @staticmethod
+    def _entity_to_user(user_info: str) ->Dict[str, any]:
+        
+        return User(**json.loads(user_info))
+    
+    @staticmethod
+    def _user_to_entity(user_info: User) -> User:
+        return json.dumps(user_info.__dict__)
      
     @staticmethod
     def _chat_to_entity(chat_request: ChatRequest) -> Dict[str, any]:
+
         return {
-            "PartitionKey": chat_request.user,
+            "PartitionKey": chat_request.user.email,
             "RowKey": chat_request.session_id,
-            "user": chat_request.user,
-            "message": chat_request.message
+            "user": ChatRepository._user_to_entity(chat_request.user),
+            "message": chat_request.message,
+            "date_created": chat_request.date_created,
+            "date_last_updated": chat_request.date_last_updated
         }
 
     @staticmethod
-    def _entity_to_chat(table_entity: Dict[str, any]):
+    def _entity_to_chat(table_entity: Dict[str, any]) -> ChatRequest:
 
         return ChatRequest(
-            user=table_entity.get("user"),
+            user=ChatRepository._entity_to_user(table_entity.get("user")),
             message=table_entity.get("message"),
-            session_id=table_entity.get("RowKey")
+            session_id=table_entity.get("RowKey"),
+            date_created = table_entity.get("date_created"),
+            date_last_updated = table_entity.get("date_last_updated")
         )
-
-    def get_chat(self, partition_key: str, row_key: str) -> ChatRequest:
-        '''
-        Query entity from your azure tables, 
-        You can specify upto 2 filters which includes user and timestamp
-        '''
-        
-        entity = self.table_client.get_entity(partition_key, row_key)
-        
-        return self._entity_to_chat(entity)
+    
 
     def create_chat(self, chat_request: ChatRequest) -> ChatRequest:
 
@@ -64,6 +73,17 @@ class ChatRepository:
         )
 
 
+    def get_chat(self, partition_key: str, row_key: str) -> ChatRequest:
+        '''
+        Query entity from your azure tables, 
+        You can specify upto 2 filters which includes user and timestamp
+        '''
+        
+        entity = self.table_client.get_entity(partition_key, row_key)
+        
+        return self._entity_to_chat(entity)
+
+
     def get_chat_history(self, partition_key: str) -> List[ChatRequest]:
 
         '''
@@ -73,18 +93,13 @@ class ChatRepository:
         
         filter= f"PartitionKey eq '{partition_key}'"
 
-        records=[]
-        table_client=self.client.get_table_client(os.getenv("AZ_TABLE_NAME"))
+        
 
-        entities=table_client.query_entities(filter)
+        entities=self.table_client.query_entities(filter)
 
         for entity in entities:
-            records.append(ChatRequest(
-                user=entity.get("PartitionKey"),
-                message=entity.get("Message"),
-                RowKey=entity.get("RowKey")
-            ))
-        return records
+            return self._entity_to_chat(entity)
+        
             
              
         
@@ -94,15 +109,18 @@ class ChatRepository:
         '''
         entity=self.table_client.get_entity(partition_key,row_key)
         entity["Message"]+=incoming_message
-        self.table_client.upsert_entity(mode=UpdateMode.REPLACE,entity=entity)
+        response = self.table_client.upsert_entity(mode=UpdateMode.REPLACE,entity=entity)
+        print(response)
 
         return f"Done updating for partition: {partition_key} and rowkey: {row_key}"
+    
     
     def delete_chat(self,partition_key: str, row_key: str) -> str:
         '''
             Deletes an entity or row from the Azure tables
         '''
-        self.table_client.delete_entity(partition_key,row_key)
+        reponse = self.table_client.delete_entity(partition_key,row_key)
+        print(reponse)
 
         return f"Done Deleting for partition: {partition_key} and rowkey: {row_key}"
     
@@ -124,4 +142,26 @@ class ChatRepository:
 
 
 if __name__=="__main__":
+    from datetime import datetime
+
+    service_client = TableServiceClient.from_connection_string("UseDevelopmentStorage=true")
+    table_client=service_client.create_table_if_not_exists("chat")
+
+    entity={
+        "PartitionKey":"umar",
+        "RowKey":"row_key3",
+        "message":"message3"
+    }
+
+    filter = "PartitionKey eq 'umar'"
+    entities = table_client.query_entities(filter)
+    for entity in entities:
+        print(entity)
+    
+
+
+ 
+
+   
+
     ...

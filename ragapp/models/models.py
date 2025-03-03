@@ -22,11 +22,11 @@ class User:
 @dataclass
 class ChatRequest:
     user: User
-    message: Optional[str]=None
-    Timestamp: Optional[datetime]=None
-    session_id: Optional[str]=str(uuid.uuid4())
     date_created: datetime
     date_last_updated: datetime
+    session_id: Optional[str]=str(uuid.uuid4())
+    message: Optional[str]=None
+    Timestamp: Optional[datetime]=None
 
 @dataclass
 class Document:
