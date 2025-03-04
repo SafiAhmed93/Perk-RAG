@@ -142,26 +142,4 @@ class ChatRepository:
 
 
 if __name__=="__main__":
-    from datetime import datetime
-
-    service_client = TableServiceClient.from_connection_string("UseDevelopmentStorage=true")
-    table_client=service_client.create_table_if_not_exists("chat")
-
-    entity={
-        "PartitionKey":"umar",
-        "RowKey":"row_key3",
-        "message":"message3"
-    }
-
-    filter = "PartitionKey eq 'umar'"
-    entities = table_client.query_entities(filter)
-    for entity in entities:
-        print(entity)
-    
-
-
- 
-
-   
-
     ...
