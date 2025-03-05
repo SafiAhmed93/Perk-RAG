@@ -46,10 +46,13 @@ def test_get_chat(chat_repo, sample_chat):
 # @pytest.mark.dependency(name="get_chat_history",depends=["get_chat"])
 def test_get_chat_history(chat_repo,sample_chat):
 
-    got = chat_repo.get_chat_history(sample_chat.user.email)
+    gots = chat_repo.get_chat_history(sample_chat.user.email)
 
-    assert got.user == sample_chat.user and got.message == sample_chat.message and got.date_created == sample_chat.date_created and \
-           got.date_last_updated == sample_chat.date_last_updated
+    for got in gots:
+
+        assert \
+            got.user == sample_chat.user and got.message == sample_chat.message and got.date_created == sample_chat.date_created and \
+            got.date_last_updated == sample_chat.date_last_updated
             
 
 

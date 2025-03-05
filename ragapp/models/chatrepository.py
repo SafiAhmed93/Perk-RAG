@@ -1,5 +1,7 @@
 import uuid
 import os
+
+# from ragapp.models.abstractrepository import Repository
 # from database import Database
 from ragapp.models.models import ChatRequest,User
 from ragapp.models.database import Database
@@ -18,19 +20,19 @@ class ChatRepository:
     partition_key: user email
     row_key: session id
     """
-    def __init__(self,database: Database):
+    def __init__(self, database: Database):
 
         self.table_name="chat"
         self.service_client=TableServiceClient.from_connection_string("UseDevelopmentStorage=true")
         self.table_client=database.get_table_client(self.table_name)
 
     @staticmethod
-    def _entity_to_user(user_info: str) ->Dict[str, any]:
+    def _entity_to_user(user_info: str) -> User:
         
         return User(**json.loads(user_info))
     
     @staticmethod
-    def _user_to_entity(user_info: User) -> User:
+    def _user_to_entity(user_info: User) -> str:
         return json.dumps(user_info.__dict__)
      
     @staticmethod
@@ -59,9 +61,9 @@ class ChatRepository:
 
     def create_chat(self, chat_request: ChatRequest) -> ChatRequest:
 
-        '''
+        """
         create entity or insert rows into the chat table.
-        '''
+        """
 
         chat = self._chat_to_entity(chat_request)
 
@@ -74,10 +76,10 @@ class ChatRepository:
 
 
     def get_chat(self, partition_key: str, row_key: str) -> ChatRequest:
-        '''
-        Query entity from your azure tables, 
+        """
+        Query entity from your azure tables,
         You can specify upto 2 filters which includes user and timestamp
-        '''
+        """
         
         entity = self.table_client.get_entity(partition_key, row_key)
         
@@ -86,56 +88,52 @@ class ChatRepository:
 
     def get_chat_history(self, partition_key: str) -> List[ChatRequest]:
 
-        '''
-        Query entities from your azure tables, 
+        """
+        Query entities from your azure tables,
         You can specify upto 2 filters which includes user and timestamp
-        '''
+        """
         
-        filter= f"PartitionKey eq '{partition_key}'"
+        filter_expression= f"PartitionKey eq '{partition_key}'"
 
-        
+        entities=self.table_client.query_entities(filter_expression)
 
-        entities=self.table_client.query_entities(filter)
 
-        for entity in entities:
-            return self._entity_to_chat(entity)
-        
+        return [self._entity_to_chat(entity) for entity in entities]
             
              
         
     def update_chat(self,partition_key: str, row_key: str, incoming_message: str) -> str:
-        '''
+        """
         Update the entities, youse partition key and Row-key
-        '''
+        """
         entity=self.table_client.get_entity(partition_key,row_key)
         entity["Message"]+=incoming_message
         response = self.table_client.upsert_entity(mode=UpdateMode.REPLACE,entity=entity)
-        print(response)
-
-        return f"Done updating for partition: {partition_key} and rowkey: {row_key}"
+        
+        return f"Done updating for partition: {partition_key} and row_key: {row_key}"
     
     
     def delete_chat(self,partition_key: str, row_key: str) -> str:
-        '''
+        """
             Deletes an entity or row from the Azure tables
-        '''
-        reponse = self.table_client.delete_entity(partition_key,row_key)
-        print(reponse)
+        """
+        response = self.table_client.delete_entity(partition_key,row_key)
+        
 
-        return f"Done Deleting for partition: {partition_key} and rowkey: {row_key}"
+        return f"Done Deleting for partition: {partition_key} and row_key: {row_key}"
     
 
     def delete_chat_history(self,partition_key: str) -> str:
 
-        '''
+        """
             Deletes all entities or rows for a particular partition.
-        '''
-        all_entites = self.list_chats(partition_key)
+        """
+        all_entities = self.get_chat_history(partition_key)
         
-        for entity in all_entites:
-            self.delete_entity(entity.user,entity.RowKey)
+        for entity in all_entities:
+            self.delete_chat(entity.user.email,entity.session_id)
 
-        return f"Deleted all entities of partiton {partition_key}"
+        return f"Deleted all entities of partition {partition_key}"
     
 
  
