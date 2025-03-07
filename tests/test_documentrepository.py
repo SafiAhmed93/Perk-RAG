@@ -32,9 +32,10 @@ def test_get_doc(doc_repo,sample_doc):
 
     assert got.document_name == sample_doc.document_name and got.access_info == sample_doc.access_info
 
-def test_update_doc(doc_repo,sample_doc):
+def test_update_doc(doc_repo,sample_doc,blob_url="https://www.goggle.com"):
 
     got = doc_repo.update_doc(sample_doc.document_name,sample_doc.document_name)
 
-    assert got.document_name == sample_doc.document_name and got.access_info == sample_doc.access_info
+    assert got.document_name == sample_doc.document_name and got.access_info == sample_doc.access_info and \
+        got.blob_url == sample_doc.blob_url
 

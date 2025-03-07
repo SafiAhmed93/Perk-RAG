@@ -57,8 +57,6 @@ class DocumentRepository:
 
     def update_doc(self, partition_key: str, row_key: str, **kwargs) -> Document:
 
-       
-
         old_entity=self.table_client.get_entity(partition_key, row_key)
 
         new_entity = {**old_entity, **kwargs}
