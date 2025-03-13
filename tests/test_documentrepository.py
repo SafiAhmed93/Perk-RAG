@@ -1,10 +1,9 @@
 from .testutils import table_service_client
-from ragapp.models.database import Database
+from ragapp.database import Database
 import pytest
 from ragapp.models.documentrepository import DocumentRepository
-from ragapp.models.models import User,Role,Document
+from ragapp.models.models import Role,Document
 from datetime import datetime
-import json
 
 database = Database(table_service_client)
 current_date=str(datetime.now())
