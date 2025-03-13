@@ -1,11 +1,9 @@
 from .testutils import table_service_client
-from ragapp.models.database import Database
+from ragapp.database import Database
 import pytest
 from ragapp.models.chatrepository import ChatRepository
 from ragapp.models.models import ChatRequest, User
 from datetime import datetime
-import uuid
-
 
 database = Database(table_service_client)
 current_date=str(datetime.now())

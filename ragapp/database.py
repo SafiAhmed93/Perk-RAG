@@ -15,3 +15,16 @@ class Database:
     def get_table_client(self, table_name):
         return self.setup_table(table_name)
 
+class DatabaseHelper:
+    @staticmethod
+    def get_database(conn_string=None):
+        if not conn_string:
+            #read from env
+            pass
+        table_service_client = TableServiceClient.from_connection_string(conn_string)
+
+        db = Database(table_service_client)
+
+        return db
+
+

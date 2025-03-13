@@ -1,6 +1,6 @@
 import pytest
 from azure.data.tables import TableServiceClient
-from ragapp.models.database import Database
+from ragapp.database import Database
 
 test_table_name = "test"
 

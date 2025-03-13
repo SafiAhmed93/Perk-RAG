@@ -1,12 +1,9 @@
 from .testutils import table_service_client
-from ragapp.models.database import Database
+from ragapp.database import Database
 import pytest
-from ragapp.models.chatrepository import ChatRepository
 from ragapp.models.userrepository import UserRepository
-from ragapp.models.models import ChatRequest, User,Role
+from ragapp.models.models import User,Role
 from datetime import datetime
-import uuid
-
 
 database = Database(table_service_client)
 current_date=str(datetime.now())
@@ -14,7 +11,7 @@ current_date=str(datetime.now())
 
 @pytest.fixture(scope="session")
 def sample_user() -> User:
-    return User(first_name="m", last_name="umar", email="umar@test.com", role=Role.ADMIN.value,date_created=current_date,date_last_updated=current_date)
+    return User(first_name="m", last_name="umar", email="umar@test.com", role=Role(1), date_created=current_date,date_last_updated=current_date)
 
 
 
@@ -26,7 +23,7 @@ def user_repo():
     database.get_table_client(user_repository.table_name).delete_table()
 
 def test_create_user(user_repo,sample_user):
-    got = user_repo.create_user(sample_user)
+    got = user_repo.create(sample_user)
 
     assert \
             got.first_name == sample_user.first_name and got.last_name == sample_user.last_name and got.email == sample_user.email and \
@@ -34,14 +31,14 @@ def test_create_user(user_repo,sample_user):
     
 
 def test_get_user(user_repo,sample_user):
-    got = user_repo.get_user(sample_user.email,sample_user.RowKey)
+    got = user_repo.get(sample_user.email,sample_user.email)
 
     assert \
             got.first_name == sample_user.first_name and got.last_name == sample_user.last_name and got.email == sample_user.email and \
             got.role == sample_user.role and got.date_created == sample_user.date_created and got.date_last_updated == sample_user.date_last_updated
     
-def test_update_user(user_repo,sample_user,last_name="Umar1"):        
-    got =user_repo.update_user(sample_user.email,sample_user.RowKey)
+def test_update_user(user_repo,sample_user):
+    got =user_repo.update(sample_user)
 
     assert \
             got.first_name == sample_user.first_name and got.last_name == sample_user.last_name and got.email == sample_user.email and \

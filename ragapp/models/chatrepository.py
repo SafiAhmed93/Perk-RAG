@@ -1,5 +1,5 @@
 from ragapp.models.models import ChatRequest,User
-from ragapp.models.database import Database
+from ragapp.database import Database
 from azure.data.tables import TableServiceClient,UpdateMode
 from typing import List, Dict
 import json

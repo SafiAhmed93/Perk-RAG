@@ -18,7 +18,6 @@ class User:
     role: Role
     date_created: datetime
     date_last_updated: datetime
-    RowKey: Optional[str]="12345"
 
 @dataclass
 class ChatRequest:

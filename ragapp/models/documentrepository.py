@@ -1,4 +1,4 @@
-from ragapp.models.database import Database
+from ragapp.database import Database
 from azure.data.tables import TableServiceClient,UpdateMode
 from ragapp.models.models import Document,Role
 from typing import Dict
