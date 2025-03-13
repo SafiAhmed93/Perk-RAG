@@ -1,10 +1,9 @@
 from fastapi import FastAPI, Depends, Header, Request, HTTPException
-from fastapi.security import OAuth2AuthorizationCodeBearer
 from typing import Annotated, Dict
 from ragapp.models.models import ChatRequest
-from ragapp.helpers.authentication import AuthHelper, AuthError
-from starlette.middleware.base import BaseHTTPMiddleware
+from ragapp.helpers.authentication import AuthHelper
 from starlette.responses import JSONResponse
+
 
 app = FastAPI()
 
