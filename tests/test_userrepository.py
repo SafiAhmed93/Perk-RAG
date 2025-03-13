@@ -40,7 +40,7 @@ def test_get_user(user_repo,sample_user):
             got.first_name == sample_user.first_name and got.last_name == sample_user.last_name and got.email == sample_user.email and \
             got.role == sample_user.role and got.date_created == sample_user.date_created and got.date_last_updated == sample_user.date_last_updated
     
-def test_update_user(user_repo,sample_user,last_name="Umar1"):
+def test_update_user(user_repo,sample_user,last_name="Umar1"):        
     got =user_repo.update_user(sample_user.email,sample_user.RowKey)
 
     assert \

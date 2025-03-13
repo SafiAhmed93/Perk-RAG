@@ -1,8 +1,9 @@
 import uvicorn
-from ragapp.app import app
+
 
 def main():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("ragapp.app:app", port=5000, reload=True)
+
 
 if __name__ == "__main__":
     main()

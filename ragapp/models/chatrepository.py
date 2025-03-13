@@ -1,19 +1,9 @@
-import uuid
-import os
-
-# from ragapp.models.abstractrepository import Repository
-# from database import Database
 from ragapp.models.models import ChatRequest,User
 from ragapp.models.database import Database
-
 from azure.data.tables import TableServiceClient,UpdateMode
-# from dotenv import load_dotenv
-# from models import ChatRequest,User
 from typing import List, Dict
 import json
-# import logging
 
-# load_dotenv("C:\\Users\\Brio-LT-Umar\\Desktop\\PROJECTS\\GIM\\.env")
 
 class ChatRepository:
     """
@@ -104,11 +94,11 @@ class ChatRepository:
         
     def update_chat(self,partition_key: str, row_key: str, incoming_message: str) -> str:
         """
-        Update the entities, youse partition key and Row-key
+        Update the chat information
         """
         entity=self.table_client.get_entity(partition_key,row_key)
         entity["Message"]+=incoming_message
-        response = self.table_client.upsert_entity(mode=UpdateMode.REPLACE,entity=entity)
+        self.table_client.upsert_entity(mode=UpdateMode.REPLACE,entity=entity)
         
         return f"Done updating for partition: {partition_key} and row_key: {row_key}"
     
@@ -117,7 +107,7 @@ class ChatRepository:
         """
             Deletes an entity or row from the Azure tables
         """
-        response = self.table_client.delete_entity(partition_key,row_key)
+        self.table_client.delete_entity(partition_key,row_key)
         
 
         return f"Done Deleting for partition: {partition_key} and row_key: {row_key}"
@@ -135,9 +125,3 @@ class ChatRepository:
 
         return f"Deleted all entities of partition {partition_key}"
     
-
- 
-
-
-if __name__=="__main__":
-    ...
