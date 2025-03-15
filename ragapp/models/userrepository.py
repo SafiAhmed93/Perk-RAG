@@ -1,6 +1,5 @@
 from ragapp.database import Database
 from azure.data.tables import TableServiceClient, UpdateMode
-
 from ragapp.models.abstractrepository import AbstractRepository
 from ragapp.models.models import User, Role
 from typing import Dict, List
