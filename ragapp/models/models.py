@@ -4,11 +4,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
+
 class Role(Enum):
     ADMIN = 1
     FACULTY = 2
     STUDENT = 3
     GUEST = 4
+
 
 @dataclass
 class User:
@@ -19,14 +21,16 @@ class User:
     date_created: datetime
     date_last_updated: datetime
 
+
 @dataclass
 class ChatRequest:
     user: User
     date_created: datetime
     date_last_updated: datetime
-    session_id: Optional[str]=str(uuid.uuid4())
-    message: Optional[str]=None
-    Timestamp: Optional[datetime]=None
+    session_id: Optional[str] = str(uuid.uuid4())
+    message: Optional[str] = None
+    Timestamp: Optional[datetime] = None
+
 
 @dataclass
 class Document:
@@ -35,12 +39,16 @@ class Document:
     access_info: List[Role]
     date_created: datetime
     date_last_updated: datetime
+    file_data: Optional[bytes] = None
+    indexed: Optional[bool] = False
+
 
 @dataclass
 class Group:
     name: str
     description: str
     members: List[User]
+
 
 @dataclass
 class Response:
