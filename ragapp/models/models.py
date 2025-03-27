@@ -35,12 +35,11 @@ class ChatRequest:
 @dataclass
 class Document:
     document_name: str
-    blob_url: str
     access_info: List[Role]
     date_created: datetime
     date_last_updated: datetime
-    file_data: Optional[bytes] = None
-    indexed: Optional[bool] = False
+    processing_status: str
+    indexed: int
 
 
 @dataclass
