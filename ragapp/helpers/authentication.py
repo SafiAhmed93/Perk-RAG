@@ -4,16 +4,6 @@ from jwt import PyJWKClient
 from fastapi import HTTPException
 
 
-# AuthError is raised when the authentication token sent by the client UI cannot be parsed or there is an authentication error accessing the graph API
-class AuthError(Exception):
-    def __init__(self, error, status_code):
-        self.error = error
-        self.status_code = status_code
-
-    def __str__(self) -> str:
-        return self.error or ""
-
-
 class AuthHelper:
     session = Session()
     authority = (
@@ -23,12 +13,14 @@ class AuthHelper:
     jwk_client = PyJWKClient(key_url)
 
     @staticmethod
-    def _get_auth_token(auth_header: str):
-        return auth_header.split("Bearer ")[-1]
+    def get_user(auth_header: str):
+        return jwt.decode(auth_header, options={"verify_signature": False}).get(
+            "unique_name"
+        )
 
     @staticmethod
-    def get_jwks():
-        return AuthHelper.session.get(AuthHelper.key_url).json()
+    def _get_auth_token(auth_header: str):
+        return auth_header.split("Bearer ")[-1]
 
     @staticmethod
     def check_valid_token(auth_header: str):

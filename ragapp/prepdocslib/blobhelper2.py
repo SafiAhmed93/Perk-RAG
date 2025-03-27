@@ -6,15 +6,20 @@ from azure.storage.filedatalake import (
     FileSystemClient,
     FileSasPermissions,
     UserDelegationKey,
-    generate_file_sas
+    generate_file_sas,
+    generate_account_sas
 )
 from azure.mgmt.storage import StorageManagementClient
 from azure.identity import DefaultAzureCredential
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from typing import Dict, Any
 from datetime import datetime, timedelta
 from pytz import timezone
 import base64
+import logging
+
+logger=logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 load_dotenv(".env")
 
@@ -81,8 +86,9 @@ class BlobHelper:
         sas_token=self.get_sas_token(file_name)
         return f"{os.getenv("AZURE_BLOB_URL")}/{file_name}?{sas_token}"
 
-    def upload(self, file_name: str, file_data: bytes) -> Dict[str, Any]:
+    def upload(self, file_name: str, file_data: str) -> Dict[str, Any]:
 
+        file_data=base64.b64decode(file_data)
         file_client = self.directory_client.get_file_client(file_name)
 
         return file_client.upload_data(file_data,overwrite=True)
@@ -91,7 +97,7 @@ class BlobHelper:
         try:
 
             files = self.filesystem_client.get_paths(self.directory_name)
-            return [file.split("/")[-1] for file in files]
+            return [file.get("name").split("/")[-1] for file in files]
 
         except ResourceNotFoundError:
 
@@ -100,7 +106,7 @@ class BlobHelper:
     def get(self, file_name: str):
 
         # First we will  create the SAS token for the file, which will have an expiry of one hour.
-        sas_token = self.get_sas_token(file_name)
+        sas_token = self.generate_sas(file_name)
         # Create the SAS URl
         return f"{os.getenv("AZURE_BLOB_URL")}/{file_name}?{sas_token}"
 

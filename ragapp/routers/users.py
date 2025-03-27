@@ -1,18 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
+from ragapp.dependencyutils import get_user_repo
 from ragapp.models.models import User
 from typing import List, Union
 from azure.core.exceptions import ResourceExistsError, ResourceNotFoundError
 from ragapp.models.userrepository import UserRepository
 from ragapp.routers import db
 
-
-user_repo = UserRepository(database=db)
-
 user_router = APIRouter(
-    prefix="/admin/users",
-    tags=["users"],
+    prefix="/admin/users", tags=["users"], dependencies=[Depends(get_user_repo)]
 )
+
+user_repo = UserRepository(db)
 
 
 @user_router.get("/")
