@@ -49,8 +49,9 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
 
         user_query = request.query_params.get("user_query")
 
+        print(request.headers.get("Authorization", None))
         # Get the JWT
-        # auth_header = request.headers.get("Authorization", None).split(" ")[1]
+        auth_header = request.headers.get("Authorization", None).split("Bearer")[-1]
         doc_helper = DocumentHelper(splitter=splitter, data_store=data_store)
         user_rep = UserRepository(db)
         doc_rep = DocumentRepository(db)
@@ -65,8 +66,11 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
             }
         )  # Using Set to deduplicate the documents name
 
-        # user = AuthHelper.get_user(auth_header)
-        user = "junaid@brio.co.in"
+        print(auth_header)
+
+        user = AuthHelper.get_user(auth_header)
+        print(user)
+        # user = "junaid@brio.co.in"
 
         user_role = user_rep.get(user, user).role
         print(user_role)
