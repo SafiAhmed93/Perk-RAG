@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import requests
 import logging
 from rich.logging import RichHandler
 from ragapp.middleware import AuthMiddleware, AuthorizationMiddelware
