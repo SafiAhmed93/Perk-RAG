@@ -10,8 +10,8 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-  - stage: Copying the code to VM
-    displayName: 'Copying the code'
+  - stage: Copying_the_code_to_VM
+    displayName: 'Copying-the-code'
     jobs:
       - job: CopyCode
         steps:
@@ -23,6 +23,9 @@ stages:
               sshEndpoint: 'linux-vm'
               contents: '**'
               targetFolder: '/home/vmadmin/gim-app'
+              cleanTargetFolder: True
               readyTimeout: '20000'
+              
+              
 
         
