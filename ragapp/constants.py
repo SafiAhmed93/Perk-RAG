@@ -29,6 +29,8 @@ embedder = AzureOpenAIEmbeddings(
     api_version="2023-05-15",
 )
 
+print(os.getenv("AZURE_SEARCH_ENDPOINT"))
+
 data_store = AzureSearch(
     azure_search_endpoint=os.getenv("AZURE_SEARCH_ENDPOINT"),
     azure_search_key=os.getenv("AZURE_SEARCH_KEY"),
