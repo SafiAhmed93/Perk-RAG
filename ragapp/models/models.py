@@ -1,5 +1,4 @@
 from datetime import datetime
-import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
@@ -21,14 +20,20 @@ class User:
     date_created: datetime
     date_last_updated: datetime
 
+@dataclass
+class Message:
+    id: int
+    message: str
+    role: str
+    timestamp: datetime
 
 @dataclass
 class ChatRequest:
     user: User
     date_created: datetime
+    message: List[Message]
     date_last_updated: datetime
-    session_id: Optional[str] = str(uuid.uuid4())
-    message: Optional[str] = None
+    session_id: str
     Timestamp: Optional[datetime] = None
 
 
@@ -43,7 +48,7 @@ class Document:
 
 
 @dataclass
-class Group:
+class Groups:
     name: str
     description: str
     members: List[User]
