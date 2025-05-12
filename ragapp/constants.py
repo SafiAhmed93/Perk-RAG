@@ -2,8 +2,6 @@ from json import load
 from langchain_community.vectorstores.azuresearch import AzureSearch
 from azure.identity import (
     DefaultAzureCredential,
-    InteractiveBrowserCredential,
-    ManagedIdentityCredential,
 )
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_openai.chat_models import AzureChatOpenAI
@@ -13,7 +11,6 @@ from langchain_openai import AzureOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-
 
 splitter = CharacterTextSplitter(chunk_size=1500, chunk_overlap=500)
 
