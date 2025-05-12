@@ -20,12 +20,14 @@ class User:
     date_created: datetime
     date_last_updated: datetime
 
+
 @dataclass
 class Message:
     id: int
     message: str
     role: str
     timestamp: datetime
+
 
 @dataclass
 class ChatRequest:
