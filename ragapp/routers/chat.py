@@ -34,7 +34,7 @@ async def get_results(chat: ChatRequest) -> ChatRequest:
     message = Message(
         str(int(chat.message.id) + 1),
         response,
-        "user",
+        "system",
         datetime.now().isoformat(),
     )
 

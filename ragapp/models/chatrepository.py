@@ -71,16 +71,9 @@ class ChatRepository:
         create entity or insert rows into the chat table.
         """
 
-        print(chat_request)
-
         chat = self._chat_to_entity(chat_request)
 
-        print(chat)
-        print(type(chat))
-
         response = self.table_client.create_entity(chat)
-
-        print(response)
 
         return self.get_chat(chat_request.session_id, chat_request.message.id)
 
