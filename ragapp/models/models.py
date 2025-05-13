@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
+from click import Option
+
 
 class Role(Enum):
     ADMIN = 1
@@ -17,25 +19,26 @@ class User:
     last_name: str
     email: str
     role: Role
-    date_created: datetime
-    date_last_updated: datetime
+    date_created: Optional[datetime]
+    date_last_updated: Optional[datetime]
 
 
 @dataclass
 class Message:
-    id: int
+    id: str
     message: str
-    role: str
-    timestamp: datetime
+    message_type: str
+    timestamp: Optional[datetime]
 
 
 @dataclass
 class ChatRequest:
     user: User
-    date_created: datetime
-    message: List[Message]
-    date_last_updated: datetime
+    message: Message
     session_id: str
+    date_created: Optional[datetime]
+    date_last_updated: Optional[datetime]
+    reponse_to: Optional[str]
     Timestamp: Optional[datetime] = None
 
 

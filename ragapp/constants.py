@@ -42,3 +42,8 @@ llm = AzureChatOpenAI(
     api_version="2025-01-01-preview",
     azure_endpoint=os.getenv("AZURE_OPEN_AI_ENDPOINT"),
 )
+
+SYSTEM_MESSAGE = """
+    You are a helpful agent. You're job is to read the context provided below and then answer the questions from it.
+    Format the answer so it is easily readable, and make it as concise as possible.
+    """

@@ -1,8 +1,13 @@
+from json import load
 from ragapp.database import Database
 from azure.data.tables import TableServiceClient, UpdateMode
 from ragapp.models.abstractrepository import AbstractRepository
 from ragapp.models.models import User, Role
 from typing import Dict, List
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class UserRepository(AbstractRepository):
@@ -11,7 +16,7 @@ class UserRepository(AbstractRepository):
 
         self.table_name = "users"
         self.service_client = TableServiceClient.from_connection_string(
-            "UseDevelopmentStorage=true"
+            os.getenv("AZURE_TABLE_CONNECTION_STRING")
         )
         self.table_client = database.get_table_client(self.table_name)
 

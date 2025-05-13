@@ -1,6 +1,12 @@
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
+
+# from proto import Message
 from ragapp.constants import llm, data_store, api_key
+from ragapp.models.chatrepository import ChatRepository
+from ragapp.routers import db
+from ragapp.models.models import ChatRequest, Message
+from datetime import datetime
 
 
 load_dotenv()
@@ -11,6 +17,8 @@ chat_router = APIRouter(
     tags=["chat"],
 )
 
+c = ChatRepository(database=db)
+
 
 @chat_router.get("/")
 def get_chat():
@@ -18,18 +26,27 @@ def get_chat():
 
 
 @chat_router.post("/")
-def get_results(user_query: str):
+async def get_results(chat: ChatRequest) -> ChatRequest:
 
-    SYSTEM_MESSAGE = """
-        You are a helpful agent. You're job is to read the context provided below and then answer the questions from it.
-        Format the answer so it is easily readable, and make it as concise as possible.
-        """
+    c.create_chat(chat)
+    response = c.respond(chat.message)
 
-    raw_context = data_store.similarity_search_with_relevance_scores(
-        query=user_query, k=3, score_threshold=0.8
+    message = Message(
+        str(int(chat.message.id) + 1),
+        response,
+        "user",
+        datetime.now().isoformat(),
     )
 
-    context = "/n".join([content[0].page_content for content in raw_context])
+    chat_request = ChatRequest(
+        chat.user,
+        message,
+        chat.session_id,
+        datetime.now(),
+        datetime.now(),
+        chat.message.id,
+        datetime.now(),
+    )
+    c.create_chat(chat_request)
 
-    response = llm.invoke(f"{SYSTEM_MESSAGE} \n {context} \n {user_query}")
-    return response.content
+    return chat_request

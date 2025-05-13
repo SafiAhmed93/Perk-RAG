@@ -4,6 +4,10 @@ from ragapp.models.models import Document, Role
 from ragapp.models.abstractrepository import AbstractRepository
 from typing import Dict
 from starlette.responses import JSONResponse
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # from azure.core.exceptions import (
 #     ResourceExistsError,
@@ -17,7 +21,7 @@ class DocumentRepository(AbstractRepository):
     def __init__(self, database: Database):
         self.table_name = "documents"
         self.service_client = TableServiceClient.from_connection_string(
-            "UseDevelopmentStorage=true"
+            os.getenv("AZURE_TABLE_CONNECTION_STRING")
         )
         self.table_client = database.get_table_client(self.table_name)
 
