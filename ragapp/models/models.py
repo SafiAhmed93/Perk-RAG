@@ -1,7 +1,8 @@
+from ast import Dict
 from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from click import Option
 
@@ -33,12 +34,15 @@ class Message:
 
 @dataclass
 class ChatRequest:
-    user: User
+    user_id: str
     message: Message
     session_id: str
     date_created: Optional[datetime]
     date_last_updated: Optional[datetime]
-    reponse_to: Optional[str]
+    augmented_message: Optional[str] = None
+    conversation: Optional[List[Dict]] = None
+    context: Optional[str] = None
+    response_to: Optional[str] = None
     Timestamp: Optional[datetime] = None
 
 

@@ -45,8 +45,8 @@ class UserRepository(AbstractRepository):
         }
 
     def create(self, user_info: User) -> str | User:
-        response = self.table_client.create_entity(self._user_to_entity(user_info))
-        return self._entity_to_user(response.get("content"))
+        self.table_client.create_entity(self._user_to_entity(user_info))
+        return self.get(user_info.email, user_info.email)
 
     def get(self, partition_key: str, row_key: str) -> User | None:
         """

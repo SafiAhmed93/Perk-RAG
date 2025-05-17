@@ -66,6 +66,7 @@ async def create_doc(access_info: str = Form(...), file: UploadFile = File(...))
             processing_status="NOT STARTED",
         )
         document = doc_repo.create(document)
+
         process_doc(document)
         return document
     except ResourceExistsError:
@@ -74,6 +75,9 @@ async def create_doc(access_info: str = Form(...), file: UploadFile = File(...))
         blob_helper.delete_blob(file.filename)
         doc_repo.delete(document.document_name, document.document_name)
         return JSONResponse(repr(e), 500)
+    except Exception as e:
+        doc_repo.delete(file.filename, file.filename)
+        blob_helper.delete_blob(file.filename)
 
 
 @doc_router.put("/{document_name}", response_model=Document)

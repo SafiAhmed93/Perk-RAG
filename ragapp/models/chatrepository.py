@@ -1,7 +1,7 @@
+from openai import chat
 from ragapp.models.models import ChatRequest, User, Message
 from ragapp.database import Database
 from azure.data.tables import TableServiceClient, UpdateMode
-from ragapp.constants import llm, data_store, api_key, SYSTEM_MESSAGE
 from typing import List, Dict
 import json
 import os
@@ -12,8 +12,10 @@ load_dotenv()
 
 class ChatRepository:
     """
+
+    This Class contains only the CRUD operations
     partition_key: user email
-    row_key: session id
+    row_key: concatenation of session_id and message_id
     """
 
     def __init__(self, database: Database):
@@ -46,10 +48,11 @@ class ChatRepository:
     def _chat_to_entity(chat_request: ChatRequest) -> Dict[str, any]:
 
         return {
-            "PartitionKey": chat_request.session_id,
-            "RowKey": chat_request.message.id,
+            "PartitionKey": chat_request.user_id,
+            "RowKey": chat_request.session_id + chat_request.message.id,
             "message": ChatRepository._message_to_entity(chat_request.message),
-            "user": ChatRepository._user_to_entity(chat_request.user),
+            "session_id": chat_request.session_id,
+            "response_to": chat_request.message.id,
             "date_created": chat_request.date_created.isoformat(),
             "date_last_updated": chat_request.date_last_updated.isoformat(),
         }
@@ -58,12 +61,13 @@ class ChatRepository:
     def _entity_to_chat(table_entity: Dict[str, any]) -> ChatRequest:
 
         return ChatRequest(
+            user_id=table_entity.get("user_id"),
             message=ChatRepository._entity_to_message(table_entity.get("message")),
-            session_id=table_entity.get("PartitionKey"),
+            session_id=table_entity.get("session_id"),
             date_created=table_entity.get("date_created"),
             date_last_updated=table_entity.get("date_last_updated"),
-            user=ChatRepository._entity_to_user(table_entity.get("user")),
-            reponse_to=table_entity.get("response_to"),
+            response_to=table_entity.get("response_to"),
+            conversation=json.dumps(table_entity.get("conversation")),
         )
 
     def create_chat(self, chat_request: ChatRequest) -> ChatRequest:
@@ -75,25 +79,27 @@ class ChatRepository:
 
         response = self.table_client.create_entity(chat)
 
-        return self.get_chat(chat_request.session_id, chat_request.message.id)
+        return self.get_chat(
+            chat_request.user_id, chat_request.session_id + chat_request.message.id
+        )
 
     def get_chat(self, partition_key: str, row_key: str) -> ChatRequest:
         """
         Query entity from your azure tables,
-        You can specify upto 2 filters which includes user and timestamp
+
         """
 
         entity = self.table_client.get_entity(partition_key, row_key)
 
         return self._entity_to_chat(entity)
 
-    def get_chat_history(self, partition_key: str) -> List[ChatRequest]:
+    def get_chat_history(self, user_id: str, session_id: str) -> List[ChatRequest]:
         """
         Query entities from your azure tables,
         You can specify upto 2 filters which includes user and timestamp
         """
 
-        filter_expression = f"PartitionKey eq '{partition_key}'"
+        filter_expression = f"PartitionKey eq '{user_id}' and RowKey ge '{session_id}'"
 
         entities = self.table_client.query_entities(filter_expression)
 
@@ -129,13 +135,3 @@ class ChatRepository:
             self.delete_chat(entity.user.email, entity.session_id)
 
         return f"Deleted all entities of partition {partition_key}"
-
-    def respond(self, message: Message) -> str:
-
-        raw_context = data_store.similarity_search_with_relevance_scores(
-            query=message.message, k=3, score_threshold=0.8
-        )
-        context = "/n".join([content[0].page_content for content in raw_context])
-        response = llm.invoke(f"{SYSTEM_MESSAGE} \n {context} \n {message.message}")
-
-        return response.content

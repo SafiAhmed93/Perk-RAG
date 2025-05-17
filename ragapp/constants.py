@@ -1,14 +1,17 @@
-from json import load
+from ast import Dict, List
 from langchain_community.vectorstores.azuresearch import AzureSearch
 from azure.identity import (
     DefaultAzureCredential,
 )
+import json
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_openai.chat_models import AzureChatOpenAI
 from langchain_text_splitters import CharacterTextSplitter
 import os
-from langchain_openai import AzureOpenAI
 from dotenv import load_dotenv
+from azure.core.credentials import AzureKeyCredential
+from azure.search.documents import SearchClient
+from typing import List, Dict
 
 load_dotenv()
 
@@ -36,6 +39,47 @@ data_store = AzureSearch(
     azure_credential=api_key,
 )
 
+
+def query_search(
+    query: str,
+    index_name: str = os.getenv("AZURE_SEARCH_INDEX_NAME"),
+    endpoint: str = os.getenv("AZURE_SEARCH_ENDPOINT"),
+    top_k: int = 3,
+):
+
+    search_client = SearchClient(
+        endpoint=endpoint,
+        index_name=index_name,
+        credential=AzureKeyCredential(os.getenv("AZURE_SEARCH_KEY")),
+    )
+
+    results = search_client.search(
+        search_text=query,
+        top=top_k,
+    )
+    data = []
+
+    for result in results:
+        search = {}
+
+        search["doc_name"] = (
+            json.loads(result.get("metadata")).get("source").split("/")[-1]
+        )
+        search["content"] = result.get("content")
+
+        data.append(search)
+    return data
+
+
+def get_context(data: List[Dict]) -> str:
+
+    return "\n".join([context.get("content") for context in data])
+
+
+def get_docs(data: List[Dict]) -> List:
+    return list({context.get("doc_name") for context in data})
+
+
 llm = AzureChatOpenAI(
     api_key=api_key,
     azure_deployment="gpt-4o-mini",
@@ -47,3 +91,9 @@ SYSTEM_MESSAGE = """
     You are a helpful agent. You're job is to read the context provided below and then answer the questions from it.
     Format the answer so it is easily readable, and make it as concise as possible.
     """
+
+REWRITE_QUERY_SYSTEM_MESSAGE = """
+
+        You are a smart assistant. Based on the conversation below, resolve the user's latest question by replacing any 
+        pronouns or references with actual entities.
+        """

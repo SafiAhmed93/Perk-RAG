@@ -56,8 +56,8 @@ class DocumentRepository(AbstractRepository):
         Creates the document entity in the  documents table and
         """
 
-        response = self.table_client.create_entity(self._doc_to_entity(doc_info))
-        return self._entity_to_doc(response.get("content"))
+        self.table_client.create_entity(self._doc_to_entity(doc_info))
+        return self.get(doc_info.document_name, doc_info.document_name)
 
     def get(self, partition_key: str, row_key: str) -> Document:
         """
