@@ -47,6 +47,9 @@ def query_search(
     top_k: int = 3,
 ):
 
+    if index_name is None or endpoint is None:
+        raise ValueError("Index name or endpoint is not set in environment variables.")
+
     search_client = SearchClient(
         endpoint=endpoint,
         index_name=index_name,

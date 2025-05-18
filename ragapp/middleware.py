@@ -62,14 +62,15 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
             return await call_next(request)
 
         user_query = await request.json()
-        chat_object = query_to_chat(user_query)
+        chat_object = ChatRequest(**user_query)
+
+        print(chat_object)
 
         # Get the User and see his access
         # Get the JWT
         auth_header = request.headers.get("Authorization", None).split("Bearer")[-1]
         user = AuthHelper.get_user(auth_header)
         # user = "junaid@brio.co.in"
-        print(user)
 
         # Get the context and document names
         search_results = query_search(
@@ -82,7 +83,11 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
         doc_access = set(
             itertools.chain(*[doc_rep.get(doc, doc).access_info for doc in documents])
         )
+
         user_role = user_rep.get(user, user).role
+
+        request._body = json.dumps(asdict(chat_object)).encode()
+
         if user_role not in doc_access:
             return JSONResponse("User does not have access", 403)
 

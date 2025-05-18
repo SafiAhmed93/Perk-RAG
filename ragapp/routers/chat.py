@@ -49,6 +49,9 @@ async def get_results(chat: ChatRequest) -> ChatRequest:
 
     print(response)
 
+    # Create a new message object for the system response
+    # with an incremented ID
+
     message = Message(
         id=str(int(chat.message.id) + 1),
         message=response,
