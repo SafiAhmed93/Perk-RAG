@@ -11,7 +11,10 @@ import os
 from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
+from azure.search.documents.models import QueryType
 from typing import List, Dict
+
+from yarl import Query
 
 load_dotenv()
 
@@ -37,6 +40,7 @@ data_store = AzureSearch(
     index_name=os.getenv("AZURE_SEARCH_INDEX_NAME"),
     embedding_function=embedder.embed_query,
     azure_credential=api_key,
+    semantic_configuration_name="default",
 )
 
 
@@ -89,7 +93,8 @@ llm = AzureChatOpenAI(
 
 SYSTEM_MESSAGE = """
     You are a helpful agent. You're job is to read the context provided below and then answer the questions from it.
-    Format the answer so it is easily readable, and make it as concise as possible.
+    Format the answer so it is easily readable, and make it as concise as possible. Remove the slash n char and any other extraneous characters.
+    Make sure the answers are easily understandable and clear. 
     """
 
 REWRITE_QUERY_SYSTEM_MESSAGE = """

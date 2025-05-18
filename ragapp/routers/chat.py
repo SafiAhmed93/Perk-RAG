@@ -41,6 +41,8 @@ async def get_results(chat: ChatRequest) -> ChatRequest:
         search_results = query_search(chat.message.message)
         chat.context = get_context(search_results)
 
+    print(chat.context)
+
     c.create_chat(chat)  # Create entity for the incoming user message
 
     response = respond(
