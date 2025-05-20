@@ -1,8 +1,8 @@
-from ast import Dict, List
 from langchain_community.vectorstores.azuresearch import AzureSearch
 from azure.identity import (
     DefaultAzureCredential,
 )
+from langchain_community.retrievers import AzureAISearchRetriever
 import json
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_openai.chat_models import AzureChatOpenAI
@@ -11,10 +11,9 @@ import os
 from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-from azure.search.documents.models import QueryType
+from azure.search.documents.models import VectorizableTextQuery
 from typing import List, Dict
-
-from yarl import Query
+from ragapp.models.models import SearchResult
 
 load_dotenv()
 
@@ -32,15 +31,14 @@ embedder = AzureOpenAIEmbeddings(
     api_version="2023-05-15",
 )
 
-print(os.getenv("AZURE_SEARCH_ENDPOINT"))
 
 data_store = AzureSearch(
     azure_search_endpoint=os.getenv("AZURE_SEARCH_ENDPOINT"),
-    azure_search_key=os.getenv("AZURE_SEARCH_KEY"),
+    azure_search_key=os.getenv("AZURE_AI_SEARCH_API_KEY"),
     index_name=os.getenv("AZURE_SEARCH_INDEX_NAME"),
     embedding_function=embedder.embed_query,
     azure_credential=api_key,
-    semantic_configuration_name="default",
+    vector_search=True,
 )
 
 
@@ -51,14 +49,22 @@ def query_search(
     top_k: int = 3,
 ):
 
+    if index_name is None or endpoint is None:
+        raise ValueError("Index name or endpoint is not set in environment variables.")
+
     search_client = SearchClient(
         endpoint=endpoint,
         index_name=index_name,
         credential=AzureKeyCredential(os.getenv("AZURE_SEARCH_KEY")),
     )
 
+    vector_query = VectorizableTextQuery(
+        text=query, k_nearest_neighbors=10, fields="content_vector"
+    )
+
     results = search_client.search(
         search_text=query,
+        vector_queries=[vector_query],
         top=top_k,
     )
     data = []
@@ -73,15 +79,6 @@ def query_search(
 
         data.append(search)
     return data
-
-
-def get_context(data: List[Dict]) -> str:
-
-    return "\n".join([context.get("content") for context in data])
-
-
-def get_docs(data: List[Dict]) -> List:
-    return list({context.get("doc_name") for context in data})
 
 
 llm = AzureChatOpenAI(
