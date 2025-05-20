@@ -61,7 +61,7 @@ class ChatRepository:
     def _entity_to_chat(table_entity: Dict[str, any]) -> ChatRequest:
 
         return ChatRequest(
-            user_id=table_entity.get("user_id"),
+            user_id=table_entity.get("PartitionKey"),
             message=ChatRepository._entity_to_message(table_entity.get("message")),
             session_id=table_entity.get("session_id"),
             date_created=table_entity.get("date_created"),
@@ -77,7 +77,9 @@ class ChatRepository:
 
         chat = self._chat_to_entity(chat_request)
 
-        response = self.table_client.create_entity(chat)
+        self.table_client.create_entity(chat)
+
+        print(chat_request.user_id)
 
         return self.get_chat(
             chat_request.user_id, chat_request.session_id + chat_request.message.id
@@ -88,8 +90,10 @@ class ChatRepository:
         Query entity from your azure tables,
 
         """
+        print(f"partition_key: {partition_key} and row_key: {row_key}")
 
         entity = self.table_client.get_entity(partition_key, row_key)
+        print("entity: ", entity)
 
         return self._entity_to_chat(entity)
 

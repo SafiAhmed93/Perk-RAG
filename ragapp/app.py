@@ -7,6 +7,10 @@ from ragapp.routers.users import user_router
 from ragapp.routers.documents import doc_router
 from ragapp.routers.chat import chat_router
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 logging.basicConfig(
