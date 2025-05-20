@@ -20,7 +20,7 @@ logging.basicConfig(
 
 app = FastAPI()
 
-app.add_middleware(AuthorizationMiddelware)
+# app.add_middleware(AuthorizationMiddelware)
 
 app.add_middleware(
     CORSMiddleware,

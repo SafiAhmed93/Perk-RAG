@@ -6,6 +6,8 @@ from typing import List, Dict
 import json
 import os
 from dotenv import load_dotenv
+from collections import defaultdict
+from ragapp.routers import db
 
 load_dotenv()
 
@@ -49,7 +51,7 @@ class ChatRepository:
 
         return {
             "PartitionKey": chat_request.user_id,
-            "RowKey": chat_request.session_id + chat_request.message.id,
+            "RowKey": chat_request.session_id + ":" + chat_request.message.id,
             "message": ChatRepository._message_to_entity(chat_request.message),
             "session_id": chat_request.session_id,
             "response_to": chat_request.message.id,
@@ -68,6 +70,7 @@ class ChatRepository:
             date_last_updated=table_entity.get("date_last_updated"),
             response_to=table_entity.get("response_to"),
             conversation=json.dumps(table_entity.get("conversation")),
+            Timestamp=table_entity.metadata["timestamp"],
         )
 
     def create_chat(self, chat_request: ChatRequest) -> ChatRequest:
@@ -79,10 +82,9 @@ class ChatRepository:
 
         self.table_client.create_entity(chat)
 
-        print(chat_request.user_id)
-
         return self.get_chat(
-            chat_request.user_id, chat_request.session_id + chat_request.message.id
+            chat_request.user_id,
+            chat_request.session_id + ":" + chat_request.message.id,
         )
 
     def get_chat(self, partition_key: str, row_key: str) -> ChatRequest:
@@ -90,10 +92,8 @@ class ChatRepository:
         Query entity from your azure tables,
 
         """
-        print(f"partition_key: {partition_key} and row_key: {row_key}")
 
         entity = self.table_client.get_entity(partition_key, row_key)
-        print("entity: ", entity)
 
         return self._entity_to_chat(entity)
 
@@ -139,3 +139,64 @@ class ChatRepository:
             self.delete_chat(entity.user.email, entity.session_id)
 
         return f"Deleted all entities of partition {partition_key}"
+
+    def list_session(self, user_id: str):
+
+        filter_expression = f"PartitionKey eq '{user_id}'"
+
+        entities = self.table_client.query_entities(filter_expression)
+
+        # entities = [self._entity_to_chat(entity) for entity in entities]
+
+        sessions_data = defaultdict(lambda: {"Timestamp": None, "Message": None})
+
+        for entity in entities:
+
+            row_key = entity.get("RowKey")
+            session_id = row_key.split(":")[0]
+            ts = entity.metadata["timestamp"]
+
+            if (
+                sessions_data[session_id]["Timestamp"] is None
+                or ts < sessions_data[session_id]["Timestamp"]
+            ):
+                sessions_data[session_id]["Timestamp"] = ts
+                sessions_data[session_id]["Message"] = entity.get("message")
+                sessions_data[session_id]["RowKey"] = row_key
+
+        sorted_session = sorted(
+            sessions_data.items(), key=lambda x: x[1]["Timestamp"], reverse=True
+        )
+
+        top_10_sessions = sorted_session[:10]
+        # print(top_10_sessions)
+
+        rowkeys = ["RowKey eq '" + item[1]["RowKey"] + "'" for item in top_10_sessions]
+        row_key_expression = " or ".join(rowkeys)
+        # print(row_key_expression)
+
+        # print(top_10_sessions)
+
+        filter_expression = f"PartitionKey eq '{user_id}' and ({row_key_expression}) "
+        # print(filter_expression)
+        entities = self.table_client.query_entities(filter_expression)
+
+        return [self._entity_to_chat(entity) for entity in entities]
+
+    def get_chat_session(self, user_id: str, session_id: str):
+
+        filter_expression = f"PartitionKey eq '{user_id}' and RowKey ge '{session_id}:1' and RowKey lt '{session_id}:999999'"
+        # print(filter_expression)
+        entities = self.table_client.query_entities(filter_expression)
+
+        return [self._entity_to_chat(entity) for entity in entities]
+
+
+if __name__ == "__main__":
+    c = ChatRepository(database=db)
+
+    # print(c.get_chat_session("umar@brio.co.in", "bcd"))
+
+    print(c.list_session("umar@brio.co.in"))
+    # ans = c.get_chat_session("umar@brio.co.in", "1")
+    # print(ans)

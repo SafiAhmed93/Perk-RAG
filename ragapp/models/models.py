@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 from pydantic import BaseModel
+import pytz
 
 
 class Role(Enum):
@@ -16,35 +17,40 @@ class User(BaseModel):
     last_name: str
     email: str
     role: Role
-    date_created: Optional[datetime]
-    date_last_updated: Optional[datetime]
+    date_created: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
+    date_last_updated: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
 
 
 class Message(BaseModel):
     id: str
     message: str
     message_type: str
-    timestamp: Optional[datetime]
+    timestamp: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
 
 
 class ChatRequest(BaseModel):
     user_id: str
-    message: Message
-    session_id: str
-    date_created: Optional[datetime]
-    date_last_updated: Optional[datetime]
+    message: Optional[Message] = None
+    session_id: Optional[str] = None
+    date_created: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
+    date_last_updated: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
     augmented_message: Optional[str] = None
-    conversation: str = None
+    conversation: Optional[str] = None
     context: Optional[str] = None
     response_to: Optional[str] = None
     Timestamp: Optional[datetime] = None
 
 
+class ChatResults(BaseModel):
+    user_id: str
+    session_id: Optional[str] = None
+
+
 class Document(BaseModel):
     document_name: str
     access_info: List[Role]
-    date_created: datetime
-    date_last_updated: datetime
+    date_created: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
+    date_last_updated: Optional[datetime] = datetime.now(pytz.timezone("Asia/Kolkata"))
     processing_status: str
     indexed: int
 
