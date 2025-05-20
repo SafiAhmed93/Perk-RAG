@@ -63,10 +63,11 @@ class DocumentHelper:
         return list({context.doc_name for context in data})
 
     def process(self):
-        # try:
-        content = self.get_content()
-        docs = self.split(content)
-        self.embed_and_save(docs)
-        #     return 0
-        # except Exception as e:
-        #     return 1
+        try:
+            content = self.get_content()
+            docs = self.split(content)
+            self.embed_and_save(docs)
+            return 0
+        except Exception as e:
+            print(repr(e))
+            return 1

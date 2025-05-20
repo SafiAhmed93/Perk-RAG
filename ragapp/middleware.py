@@ -116,9 +116,3 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
         request._json = chat_object.model_dump_json()
 
         return await call_next(request)
-
-
-class ChatContextMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-
-        return await super().dispatch(request, call_next)
