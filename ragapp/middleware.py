@@ -80,6 +80,8 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
         #     chat_object.augmented_message or chat_object.message.message
         # )
 
+        print(chat_object.message.message)
+
         search_results = doc_helper.query(chat_object.message.message)
 
         print(f"search results: {search_results}")

@@ -1,3 +1,4 @@
+from openai import azure_endpoint
 from ragapp.models.models import SearchResult
 from ragapp.prepdocslib.blobhelper2 import BlobHelper
 from langchain_core.document_loaders import BaseLoader
@@ -35,11 +36,22 @@ class DocumentHelper:
 
     def query(self, user_query: str) -> List[SearchResult]:
 
-        data = AzureAISearchRetriever(
+        print(f"user query:{user_query}")
+
+        if not os.getenv("AZURE_AI_SEARCH_INDEX_NAME") or not os.getenv(
+            "AZURE_AI_SEARCH_API_KEY"
+        ):
+            raise ValueError("Azure Search index name or API key is not set.")
+        retriver = AzureAISearchRetriever(
             content_key="content",
             top_k=3,
-            index_name=os.getenv("AZURE_SEARCH_INDEX_NAME"),
-        ).invoke(user_query)
+            index_name=os.getenv("AZURE_AI_SEARCH_INDEX_NAME"),
+            api_key=os.getenv("AZURE_AI_SEARCH_API_KEY"),
+        )
+
+        data = retriver.invoke(input=user_query)
+
+        print("here")
 
         search_results = []
 

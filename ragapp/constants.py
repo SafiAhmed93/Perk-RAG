@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizableTextQuery
-from typing import List, Dict
 from ragapp.models.models import SearchResult
 
 load_dotenv()
@@ -31,11 +30,13 @@ embedder = AzureOpenAIEmbeddings(
     api_version="2023-05-15",
 )
 
+print(os.getenv("AZURE_SEARCH_ENDPOINT"))
+
 
 data_store = AzureSearch(
     azure_search_endpoint=os.getenv("AZURE_SEARCH_ENDPOINT"),
     azure_search_key=os.getenv("AZURE_AI_SEARCH_API_KEY"),
-    index_name=os.getenv("AZURE_SEARCH_INDEX_NAME"),
+    index_name=os.getenv("AZURE_AI_SEARCH_INDEX_NAME"),
     embedding_function=embedder.embed_query,
     azure_credential=api_key,
     vector_search=True,

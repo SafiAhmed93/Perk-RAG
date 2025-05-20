@@ -1,6 +1,6 @@
 import time
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 # from proto import Message
 from ragapp.constants import (
@@ -14,7 +14,7 @@ from ragapp.models.chatrepository import ChatRepository
 from ragapp.routers import db
 from ragapp.utils import query_to_chat, respond
 from ragapp.helpers.documenthelper import DocumentHelper
-from ragapp.models.models import ChatRequest, Message
+from ragapp.models.models import ChatRequest, Message, ChatResults
 from datetime import datetime
 import logging
 
@@ -31,9 +31,16 @@ c = ChatRepository(database=db)
 doc_helper = DocumentHelper(splitter=splitter, data_store=data_store)
 
 
-@chat_router.get("/")
-def get_chat():
-    return "chat"
+@chat_router.post("/list_session")
+def list_session(chat: ChatResults):
+
+    return c.list_session(chat.user_id)
+
+
+@chat_router.post("/get_chat_session")
+def get_chat_session(chat: ChatResults):
+
+    return c.get_chat_session(chat.user_id, chat.session_id)
 
 
 @chat_router.post("/")
