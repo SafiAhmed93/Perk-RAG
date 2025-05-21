@@ -20,11 +20,11 @@ logging.basicConfig(
 
 app = FastAPI()
 
-# app.add_middleware(AuthorizationMiddelware)
+app.add_middleware(AuthorizationMiddelware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://blue-stone-0d553cf00.6.azurestaticapps.net"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

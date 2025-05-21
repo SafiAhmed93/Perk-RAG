@@ -62,6 +62,13 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
         if request.url.path in openapi_paths:
             return await call_next(request)
 
+
+        auth_header = request.headers.get("Authorization", None).split("Bearer")[-1]
+        user = AuthHelper.get_user(auth_header)
+
+        if request.url.path == "/chat/list_session" or request.url.path == "/chat/get_chat_session":
+            return await call_next(request)
+
         request_body = await request.body()
 
         user_query = await request.json()
@@ -71,16 +78,12 @@ class AuthorizationMiddelware(BaseHTTPMiddleware):
 
         # Get the User and see his access
         # Get the JWT
-        auth_header = request.headers.get("Authorization", None).split("Bearer")[-1]
-        user = AuthHelper.get_user(auth_header)
         # user = "junaid@brio.co.in"
 
         # Get the context and document names
         # search_results = query_search(
         #     chat_object.augmented_message or chat_object.message.message
         # )
-
-        print(chat_object.message.message)
 
         search_results = doc_helper.query(chat_object.message.message)
 
