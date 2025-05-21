@@ -1,3 +1,4 @@
+import itertools
 import time
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, Request
@@ -11,8 +12,10 @@ from ragapp.constants import (
     query_search,
 )
 from ragapp.models.chatrepository import ChatRepository
-from ragapp.routers import db
-from ragapp.utils import query_to_chat, respond
+from ragapp.models.documentrepository import DocumentRepository
+from ragapp.models.userrepository import UserRepository
+from ragapp.routers import db, documents
+from ragapp.utils import query_to_chat, respond, rewrite_query
 from ragapp.helpers.documenthelper import DocumentHelper
 from ragapp.models.models import ChatRequest, Message, ChatResults
 from datetime import datetime
@@ -29,6 +32,8 @@ chat_router = APIRouter(
 
 c = ChatRepository(database=db)
 doc_helper = DocumentHelper(splitter=splitter, data_store=data_store)
+doc_rep = DocumentRepository(db)
+user_rep = UserRepository(db)
 
 
 @chat_router.post("/list_session")
@@ -46,31 +51,47 @@ def get_chat_session(chat: ChatResults):
 @chat_router.post("/")
 async def get_results(chat: ChatRequest) -> ChatRequest:
 
-    if chat.context is None:
-        logging.info("No context found, searching for documents")
-        # Get the documents from the database
-        search_results = doc_helper.query(chat.message.message)
-        chat.context = doc_helper.get_context(search_results)
+    search_results = None
+    response = None
+    c.create_chat(chat)
+    query = None
+    message = None
 
-    print(chat.context)
+    if chat.conversation == "[]":
+        query = chat.message.message  # get response for the incoming query
+    else:
+        chat.augmented_message = rewrite_query(chat.message, chat.conversation)
+        query = chat.augmented_message
 
-    c.create_chat(chat)  # Create entity for the incoming user message
-
-    response = respond(
-        message=chat.message, context=chat.context, conversation=chat.conversation
-    )  # get response for the incoming query
-
-    logging.info(f"Response generated: {response}")
-
-    # Create a new message object for the system response
-    # with an incremented ID
-
-    message = Message(
-        id=str(int(chat.message.id) + 1),
-        message=response,
-        message_type="system",
-        timestamp=datetime.now().isoformat(),
+    search_results = doc_helper.query(query)
+    documents = doc_helper.get_docs(search_results)
+    doc_access = set(
+        itertools.chain(*[doc_rep.get(doc, doc).access_info for doc in documents])
     )
+    user_role = user_rep.get(chat.user_id, chat.user_id).role
+
+    chat.context = doc_helper.get_context(search_results)
+
+    if user_role not in doc_access:
+        message = Message(
+            id=str(int(chat.message.id) + 1),
+            message="Sorry you do not have access to the document containing this information.",
+            message_type="system",
+            timestamp=datetime.now().isoformat(),
+        )
+    else:
+        response = respond(
+            message=query,
+            context=chat.context,
+            conversation=chat.conversation,
+        )
+
+        message = Message(
+            id=str(int(chat.message.id) + 1),
+            message=response,
+            message_type="system",
+            timestamp=datetime.now().isoformat(),
+        )
 
     chat_request = ChatRequest(
         user_id=chat.user_id,
@@ -82,8 +103,7 @@ async def get_results(chat: ChatRequest) -> ChatRequest:
         Timestamp=datetime.now(),
     )
     logging.info(f"Chat generated and now writing to the database")
-    # Create entity for the system response
-    c.create_chat(chat_request)  # Create entity for the system response.
+    c.create_chat(chat_request)
     logging.info(f"Chat returning")
 
     return chat_request

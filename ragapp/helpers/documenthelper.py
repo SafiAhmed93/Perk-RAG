@@ -36,7 +36,7 @@ class DocumentHelper:
 
     def query(self, user_query: str) -> List[SearchResult]:
 
-        print(f"user query:{user_query}")
+        # print(f"user query:{user_query}")
 
         if not os.getenv("AZURE_AI_SEARCH_INDEX_NAME") or not os.getenv(
             "AZURE_AI_SEARCH_API_KEY"
@@ -51,7 +51,7 @@ class DocumentHelper:
 
         data = retriver.invoke(input=user_query)
 
-        print("here")
+        # print("here")
 
         search_results = []
 

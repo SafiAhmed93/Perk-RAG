@@ -7,7 +7,7 @@ from ragapp.constants import (
 from typing import Dict
 
 
-def respond(message: Message, context: str, conversation: str) -> str:
+def respond(message: str, context: str, conversation: str) -> str:
     """
     Send the response to the incoming user query.
 
@@ -22,7 +22,7 @@ def respond(message: Message, context: str, conversation: str) -> str:
         below is the context retrieved \n
         {context} \n
         Below is the new user query \n
-        {message.message}
+        {message}
         """
     )
 
@@ -37,8 +37,6 @@ def rewrite_query(message: Message, conversation: str):
             {conversation}
             Below is the new query:\n
             {message.message}
-
-
             """
     )
 
