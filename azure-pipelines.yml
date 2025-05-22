@@ -35,11 +35,11 @@ stages:
             inputs:
               sshEndpoint: 'linux-vm'
               runOptions: 'commands'
-              commands: |
-                cd /home/vmadmin/gim-app
-                ls -la /home/vmadmin/gim-app
-                ~/.local/bin/poetry lock
-                ~/.local/bin/poetry install
+              inline: |
+                cd /home/vmadmin/gim-app && \
+                ls -la /home/vmadmin/gim-app && \
+                ~/.local/bin/poetry lock && \
+                ~/.local/bin/poetry install && \
                 ~/.local/bin/poetry run serve
               
 
