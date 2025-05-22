@@ -34,7 +34,7 @@ stages:
           - task: SSH@0
             inputs:
               sshEndpoint: 'linux-vm'
-              runOptions: 'commands'
+              runOptions: 'inline'
               inline: |
                 cd /home/vmadmin/gim-app && \
                 ls -la /home/vmadmin/gim-app && \
