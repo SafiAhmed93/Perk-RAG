@@ -37,6 +37,7 @@ stages:
               runOptions: 'commands'
               commands: |
                 cd /home/vmadmin/gim-app
+                ls -l
                   ~/.local/bin/poetry lock
                   ~/.local/bin/poetry install
                   ~/.local/bin/poetry run serve
