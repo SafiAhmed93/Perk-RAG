@@ -25,7 +25,21 @@ stages:
               targetFolder: '/home/vmadmin/gim-app'
               cleanTargetFolder: True
               readyTimeout: '20000'
-              
+
+  - stage: Build_the_code
+    displayName: 'Build-the-code'
+    jobs:
+      - job: BuildCode
+        steps:
+          - task: SSH@0
+            inputs:
+              sshEndpoint: 'linux-vm'
+              runOptions: 'commands'
+              commands: |
+                cd /home/vmadmin/gim-app
+                poetry lock
+                poetry install
+                poetry run serve 
               
 
         
