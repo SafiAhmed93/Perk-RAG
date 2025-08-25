@@ -18,7 +18,7 @@ logging.basicConfig(
 
 app = FastAPI()
 
-app.add_middleware(AuthMiddleware)
+# app.add_middleware(AuthMiddleware)
 
 
 app.add_middleware(
