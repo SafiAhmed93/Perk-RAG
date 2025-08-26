@@ -18,17 +18,18 @@ load_dotenv()
 
 splitter = CharacterTextSplitter(chunk_size=1500, chunk_overlap=500)
 
-api_key = (
-    DefaultAzureCredential().get_token("https://cognitiveservices.azure.com")
-).token
+api_key = os.getenv("AZURE_OPENAI_API_KEY")
 
 embedder = AzureOpenAIEmbeddings(
     azure_deployment="text-embedding-ada-002",
-    azure_endpoint="https://brio-calliq-poc.openai.azure.com/",
     model="text-embedding-ada-002",
+    azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT"),
     api_key=api_key,
     api_version="2023-05-15",
 )
+
+
+print("Azure-ad-token:", embedder.azure_ad_token)
 
 print(os.getenv("AZURE_SEARCH_ENDPOINT"))
 
@@ -38,8 +39,7 @@ data_store = AzureSearch(
     azure_search_key=os.getenv("AZURE_AI_SEARCH_API_KEY"),
     index_name=os.getenv("AZURE_AI_SEARCH_INDEX_NAME"),
     embedding_function=embedder.embed_query,
-    azure_credential=api_key,
-    vector_search=True,
+    # vector_search=True,
 )
 
 

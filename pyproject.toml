@@ -15,7 +15,7 @@ dependencies = [
     "azure-search-documents",
     "openai",
     "pydantic",
-    "uvicorn",
+    "uvicorn[standard] (>=0.35.0,<0.36.0)",
     "pytest",
     "pytest-dependency",
     "msal",

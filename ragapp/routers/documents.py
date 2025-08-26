@@ -1,6 +1,5 @@
 from json import load
 from fastapi import APIRouter, Depends, File, UploadFile, Form
-from pyparsing import C
 from starlette.responses import JSONResponse
 from ragapp.helpers.documenthelper import DocumentHelper
 from ragapp.models.models import Document, Role

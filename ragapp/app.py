@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import logging
-from rich.logging import RichHandler
+
+# from rich.logging import RichHandler
 from ragapp.middleware import AuthMiddleware
 from ragapp.routers.users import user_router
 from ragapp.routers.documents import doc_router
@@ -11,9 +12,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-logging.basicConfig(
-    format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)]
-)
+# logging.basicConfig(
+#     format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True)]
+# )
 
 
 app = FastAPI()
