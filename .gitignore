@@ -11,3 +11,4 @@ ragapp/models/__pycache__
 tests/__pycache__
 .pytest_cache
 .vscode
+env.json
