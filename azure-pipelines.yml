@@ -4,7 +4,7 @@
 # https://aka.ms/yaml
 
 trigger:
-- gimstage
+- perkstage
 
 pool:
   vmImage: ubuntu-latest
@@ -22,7 +22,7 @@ stages:
             inputs:
               sshEndpoint: 'linux-vm'
               contents: '**/*'
-              targetFolder: '/home/vmadmin/gim-app'
+              targetFolder: '/home/vmadmin/perk-app'
               cleanTargetFolder: True
               readyTimeout: '20000'
 
@@ -36,8 +36,8 @@ stages:
               sshEndpoint: 'linux-vm'
               runOptions: 'inline'
               inline: |
-                cd /home/vmadmin/gim-app && \
-                ls -la /home/vmadmin/gim-app && \
+                cd /home/vmadmin/perk-app && \
+                ls -la /home/vmadmin/perk-app && \
                 ~/.local/bin/poetry lock && \
                 ~/.local/bin/poetry install && \
                 ~/.local/bin/poetry run serve
